@@ -17,3 +17,7 @@ class CommunicationToServer:
     
     def send_message(self, text):
         self.client_socket.send((text + '\r\n').encode())
+
+    def disconnect_to_server(self):
+        self.client_socket.shutdown()
+        self.client_socket.close()
