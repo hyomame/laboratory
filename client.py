@@ -39,6 +39,7 @@ def play(client, action):
                 exit(1)
             elif smessage == '001 NEXT':
                 loop_flag = False
+                break
             elif smessage != '000 NOTPLAY':
                 print('[send] ' + smessage)
                 client.send_message(smessage)
