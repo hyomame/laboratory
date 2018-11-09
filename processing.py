@@ -47,18 +47,11 @@ class ProcessingMessage:
                 self.play_message = None
                 #↓ここに関数
                 propriety = self.play()
-                if propriety != '001 ERROR':
+                if propriety and self.play_message != None:
                     return self.play_message
-                """
-                code = input()
-                mactch_play_msg = self.PLAY_MSGPTN.match(code)
-                if mactch_play_msg:
-                    worker = mactch_play_msg.group(1)
-                    place = mactch_play_msg.group(2)
-                    text = self.action(self.MY_ID, place, worker)
-                    print(type(text))
-                return text
-                """
+                else:
+                    print('action error.')
+                    return '003 DISCONNECT'
             elif num == 206:
                 match_opp_msg = self.OPP_PLAY_MSGPTN.match(message)
                 if match_opp_msg:
@@ -80,13 +73,13 @@ class ProcessingMessage:
                 return '000 NOTPLAY'
             elif num == 400:
                 print('syntax error!')
-                return '000 NOTPLAY'
+                return '003 DISCONNECT'
             elif num == 401:
                 print('worker error!')
-                return '000 NOTPLAY'
+                return '003 DISCONNECT'
             elif num == 402:
                 print('turn error!')
-                return '000 NOTPLAY'
+                return '003 DISCONNECT'
             elif num == 501:
                 print(self.state.get_board_information())
                 print(self.state.get_resource_information())
@@ -98,10 +91,10 @@ class ProcessingMessage:
                     with open(path, mode='a') as f:
                             f.write('\r\n'+str(reward)+'\r\n\r\n')
                     
-                    print(self.winner)
+                    print('winner is '+str(self.winner))
                 return '000 NOTPLAY'
             elif num == 502:
-                return '203 EXIT'
+                return '001 NEXT'
             else:
                 return '000 NOTPLAY'
 
@@ -117,9 +110,9 @@ class ProcessingMessage:
             print(self.state.get_board_information())
             print(self.state.get_resource_information())
             self.state.do_play(ID, place, worker)
-            return '002 OK'
+            return True
         else:
-            return '001 ERROR'
+            return False
   
     def play(self):
         workers = self.state.get_useable_workers()
@@ -128,7 +121,7 @@ class ProcessingMessage:
             dql_solver = DQN_Solver(2,2)
             movables = self.can_put_P()
             if movables == []:
-                return '001 ERROR'
+                return False
 
             action = dql_solver.choose_action(self.state.get_season(),movables)
             print(action)
@@ -152,13 +145,13 @@ class ProcessingMessage:
             print(self.state.get_board_information())
             print(self.state.get_resource_information())
             self.state.do_play(self.MY_ID, action, 'P')
-            return '002 OK'
+            return True
 
         elif workers[2][self.MY_ID] >= 1:
             dql_solver = DQN_Solver(2,2)
             movables = self.can_put_S()
             if movables == []:
-                return '001 ERROR'
+                return False
 
             action = dql_solver.choose_action(self.state.get_season(),movables)
             print(action)
@@ -183,12 +176,12 @@ class ProcessingMessage:
             print(self.state.get_board_information())
             print(self.state.get_resource_information())
             self.state.do_play(self.MY_ID, action, 'S')
-            return '002 OK'
+            return True
         else:
             dql_solver = DQN_Solver(2,2)
             movables = self.can_put_A()
             if movables == []:
-                return '001 ERROR'
+                return False
 
             action = dql_solver.choose_action(self.state.get_season(),movables)
             print(action)
@@ -213,9 +206,9 @@ class ProcessingMessage:
                         f.write(str(x)+',')
                     f.write('\r\n')
             
-            return '002 OK'
+            return True
             
-        return '001 ERROR'
+        return False
 
     def can_put_P(self):
         list1 = []
@@ -322,3 +315,9 @@ class ProcessingMessage:
 
         return list1
         
+    def reset_board(self):
+        self.winner = -1
+        self.play_message = None
+        self.state = game.Game()
+        self.state.set_player_name(self.MY_ID, self.MY_NAME)
+        self.state.set_player_name(self.OPP_ID, 'opponent')

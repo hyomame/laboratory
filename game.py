@@ -426,8 +426,8 @@ class Game:
                     elif w == 'S1':
                         SCount[1] += 1
                     
-                self.game_resources[0].add_reserch_point((SCount[0]+SCount[1])//2 * PACount)
-                self.game_resources[1].add_reserch_point((SCount[0]+SCount[1])//2 * PACount)
+                self.game_resources[0].add_reserch_point((SCount[0]+SCount[1])//2 * PACount * SCount[0])
+                self.game_resources[1].add_reserch_point((SCount[0]+SCount[1])//2 * PACount * SCount[1])
 
             
             #実験による研究ポイントの獲得
